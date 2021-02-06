@@ -76,9 +76,18 @@ function runTracker() {
 };
 
 function viewEmployees(){
-  var query = "SELECT employee.*, role.title, department.name as department, role.salary from employee\n";
-  query += "INNER JOIN role on employee.id = role.id\n";
-  query += "INNER JOIN department on employee.id = department.id";
+  var query = "select e.id,\n"; 
+  query += "e.first_name,\n";
+  query += "e.last_name,\n";
+  query += "role.title,\n";
+  query += "department.name as department,\n";
+  query += "role.salary,\n";
+  query += "Concat(m.first_name, ' ', m.last_name) as manager\n";
+  query += "from employee e\n";
+  query += "INNER JOIN role on e.role_id = role.id\n";
+  query += "INNER JOIN department on role.department_id = department.id\n";
+  query += "left join employee m on  m.id = e.manager_id\n";
+  query += "ORDER BY e.id;";
     connection.query(query, async function(err, res) {
       await console.table(res);  
       runTracker();
@@ -125,10 +134,20 @@ function viewByDepartment(){
 }
 
 function viewDepartment(department){
-  var query = "SELECT employee.*, role.title, department.name as department, role.salary from employee\n";
-  query += "INNER JOIN role on employee.id = role.id\n";
-  query += "INNER JOIN department on employee.id = department.id\n";
-  query += "WHERE department.name = ?"
+  var query = "select e.id,\n"; 
+  query += "e.first_name,\n";
+  query += "e.last_name,\n";
+  query += "role.title,\n";
+  query += "department.name as department,\n";
+  query += "role.salary,\n";
+  query += "Concat(m.first_name, ' ', m.last_name) as manager\n";
+  query += "from employee e\n";
+  query += "INNER JOIN role on e.role_id = role.id\n";
+  query += "INNER JOIN department on role.department_id = department.id\n";
+  query += "left join employee m on  m.id = e.manager_id\n";
+  query += "WHERE department.name = ?\n";
+  query += "ORDER BY e.id;";
+  
   connection.query(query, department, async function(err, res) {
     await console.table(res);  
     viewByDepartment();
