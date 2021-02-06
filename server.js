@@ -85,3 +85,52 @@ function viewEmployees(){
     })
 }
 
+function viewByDepartment(){
+  inquirer
+    .prompt({
+      name: "action",
+      type: "rawlist",
+      message: "Which department would you like to view?",
+      choices: [
+        "Engineering",
+        "Finance",
+        "Legal",
+        "Sales",
+        "Return to the Main Menu"
+      ]
+    })
+    .then(function(answer) {
+      switch (answer.action) {
+      case "Engineering":
+        viewDepartment("Engineering");
+        break;
+
+      case "Finance":
+        viewDepartment("Finance");
+        break;
+
+      case "Legal":
+        viewDepartment("Legal");
+        break;
+
+      case "Sales":
+        viewDepartment("Sales");
+        break;
+
+      case "Return to the Main Menu":
+        runTracker();
+        break;
+      }
+    });
+}
+
+function viewDepartment(department){
+  var query = "SELECT employee.*, role.title, role.salary, department.name as department from employee\n";
+  query += "INNER JOIN role on employee.id = role.id\n";
+  query += "INNER JOIN department on employee.id = department.id\n";
+  query += "WHERE department.name = ?"
+  connection.query(query, department, async function(err, res) {
+    await console.table(res);  
+    viewByDepartment();
+  })
+}
