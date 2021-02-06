@@ -69,7 +69,7 @@ function runTracker() {
         break;
 
       case "Exit":
-        // f();
+        connection.end();
         break;
       }
     });
@@ -83,5 +83,5 @@ function viewEmployees(){
       await console.table(res);  
       runTracker();
     })
-    
 }
+
