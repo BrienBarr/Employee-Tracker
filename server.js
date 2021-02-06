@@ -35,8 +35,8 @@ function runTracker() {
         "Remove Employee",
         "Update Employee Role",
         "Update Employee Manager",
-        "Exit"
-      ]
+        "Exit",
+      ]      
     })
     .then(function(answer) {
       switch (answer.action) {
@@ -76,7 +76,7 @@ function runTracker() {
 };
 
 function viewEmployees(){
-  var query = "SELECT employee.*, role.title, role.salary, department.name as department from employee\n";
+  var query = "SELECT employee.*, role.title, department.name as department, role.salary from employee\n";
   query += "INNER JOIN role on employee.id = role.id\n";
   query += "INNER JOIN department on employee.id = department.id";
     connection.query(query, async function(err, res) {
@@ -125,7 +125,7 @@ function viewByDepartment(){
 }
 
 function viewDepartment(department){
-  var query = "SELECT employee.*, role.title, role.salary, department.name as department from employee\n";
+  var query = "SELECT employee.*, role.title, department.name as department, role.salary from employee\n";
   query += "INNER JOIN role on employee.id = role.id\n";
   query += "INNER JOIN department on employee.id = department.id\n";
   query += "WHERE department.name = ?"
