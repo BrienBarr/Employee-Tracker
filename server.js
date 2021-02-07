@@ -153,3 +153,71 @@ function viewDepartment(department){
     viewByDepartment();
   })
 }
+
+function viewByManager(){
+  var managers = [];
+  var managerList = [];
+  var query = "select distinct(e.manager_id), m.first_name, m.last_name from employee e\n";
+  query += "left join employee m on m.id = e.manager_id";
+  async function getManagers(){
+    await connection.query(query, function(err, res){
+      for (i = 0; i < res.length; i++){
+          managers.push(res[i]);
+      }
+      managers.shift();
+      managers.forEach((element) => {
+        managerList.push(element.first_name + " " + element.last_name);
+      })
+      // console.log(managers);
+      // console.log(managerList);
+      managerList.push("Return to Main Menu");
+      promptUserForManager(managerList, managers);
+    })
+  };
+  getManagers();
+
+  function promptUserForManager(managerList, managers){
+    var question = {
+      name: "action",
+      type: "rawlist",
+      message: "Which manager would you like to view by?",
+      choices: managerList
+    }
+    inquirer
+    .prompt(question)
+    .then(function(answer){
+      if(answer.action === "Return to Main Menu"){
+        runTracker();
+      }
+      var query = "select e.id,\n"; 
+      query += "e.first_name,\n";
+      query += "e.last_name,\n";
+      query += "role.title,\n";
+      query += "department.name as department,\n";
+      query += "role.salary,\n";
+      query += "Concat(m.first_name, ' ', m.last_name) as manager\n";
+      query += "from employee e\n";
+      query += "INNER JOIN role on e.role_id = role.id\n";
+      query += "INNER JOIN department on role.department_id = department.id\n";
+      query += "left join employee m on  m.id = e.manager_id\n";
+      query += "WHERE e.manager_id = ?\n";
+      query += "ORDER BY e.id;";
+      
+      // console.log(question.choices.indexOf(answer.action));
+      var manName = answer.action.split(" ");
+      var manID;
+      // console.log(manName);
+      // console.log(managers);
+      managers.forEach((element) => {
+        if((element.first_name === manName[0]) && (element.last_name === manName[1])){
+          manID = element.manager_id;
+          // console.log(manID);
+          connection.query(query, manID, async function(err, res) {
+            await console.table(res);  
+            viewByManager();
+          })
+        }
+      })
+    })
+  }
+}
