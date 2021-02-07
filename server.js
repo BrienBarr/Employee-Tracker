@@ -21,6 +21,11 @@ connection.connect(function(err) {
   runTracker();
 });
 
+var employees = [];
+var employeeList = [];
+var roles = [];
+var roleList = [];
+
 function runTracker() {
   inquirer
     .prompt({
@@ -220,4 +225,91 @@ function viewByManager(){
       })
     })
   }
+}
+
+async function addEmployee(){
+  await getEmployees();
+  await getRoles();
+  addEmployeePrompt(roles, roleList, employees, employeeList);  
+}
+
+function getEmployees(){
+  var query = "SELECT * FROM employee;";
+  connection.query(query, function(err, res){
+    for (i = 0; i < res.length; i++){
+      employees.push(res[i]);
+    }
+      employees.forEach((element) => {
+        employeeList.push(element.first_name + " " + element.last_name);
+      })
+      employeeList.push("Return to Main Menu"); 
+  })
+}
+
+function getRoles(){
+  var query = "SELECT * FROM role;";
+  connection.query(query, function(err, res){
+    for (i = 0; i < res.length; i++){
+      roles.push(res[i]);
+    }
+      roles.forEach((element) => {
+        roleList.push(element.title);
+      })
+     roleList.push("Return to Main Menu"); 
+  })
+}
+
+function addEmployeePrompt(roles, roleList, employees, employeeList){
+  inquirer
+  .prompt([
+      {
+        name: "fName",
+        type: "input",
+        message: "What is the new employee's first name?"
+      },
+      {
+        name: "lName",
+        type: "input",
+        message: "What is the new employee's last name?"
+      },
+      {
+        name: "role",
+        type: "rawlist",
+        message: "What is the new employee's role?",
+        choices: roleList
+      },
+      {
+        name: "manager",
+        type: "rawlist",
+        message: "Who is the new employee's manager?",
+        choices: employeeList
+      }
+  ])
+  .then(function(answer){
+    // if (err) throw err;
+    console.log("New Employee: " + JSON.stringify(answer));
+    var manName = answer.manager.split(" ");
+    var manID;
+    employees.forEach((element) => {
+      if((element.first_name === manName[0]) && (element.last_name === manName[1])){
+        manID = element.id;
+        console.log(manID);
+      }
+    })
+    var roleID;
+    roles.forEach((element) => {
+      if(element.title === answer.role){
+        roleID = element.id;
+        console.log(roleID);
+      }
+    })
+    query = "INSERT INTO employee (first_name, last_name, role_id, manager_id)\n";
+    query += "VALUES (" + JSON.stringify(answer.fName) + ", " + JSON.stringify(answer.lName) + ", ";
+    query += JSON.stringify(roleID) + ", " + JSON.stringify(manID) + ")";
+    connection.query(query, function(err, res){
+      if(err) throw err;
+      console.log("Added " + answer.fName + " " + answer.lName + " to the database");
+      runTracker();
+    })
+  })
 }
