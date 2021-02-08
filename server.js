@@ -1,6 +1,8 @@
-var mysql = require("mysql");
-var inquirer = require("inquirer");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
 // const util = require("util");
+const chalk = require("chalk");
+// const colors = require("colors");
 const cTable = require('console.table');
 
 var connection = mysql.createConnection({
@@ -19,6 +21,36 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
   if (err) throw err;
+  console.log(
+		chalk.green(`
+---------------------------------------------------------------------------------------                                                
+     ________                          __                                              
+    /        |                        /  |                                             
+    $$$$$$$$/  _____  ____    ______  $$ |  ______   __    __   ______    ______       
+    $$ |__    /     \/    \  /      \ $$ | /      \ /  |  /  | /      \  /      \      
+    $$    |   $$$$$$ $$$$  |/$$$$$$  |$$ |/$$$$$$  |$$ |  $$ |/$$$$$$  |/$$$$$$  |     
+    $$$$$/    $$ | $$ | $$ |$$ |  $$ |$$ |$$ |  $$ |$$ |  $$ |$$    $$ |$$    $$ |     
+    $$ |_____ $$ | $$ | $$ |$$ |__$$ |$$ |$$ \__$$ |$$ \__$$ |$$$$$$$$/ $$$$$$$$/      
+    $$       |$$ | $$ | $$ |$$    $$/ $$ |$$    $$/ $$    $$ |$$       |$$       |     
+    $$$$$$$$/ $$/  $$/  $$/ $$$$$$$/  $$/  $$$$$$/   $$$$$$$ | $$$$$$$/  $$$$$$$/      
+                            $$ |                    /  \__$$ |                         
+                            $$ |                    $$    $$/                          
+                            $$/                      $$$$$$/                           
+     __       __                                                                       
+    /  \     /  |                                                                      
+    $$  \   /$$ |  ______   _______    ______    ______    ______    ______            
+    $$$  \ /$$$ | /      \ /       \  /      \  /      \  /      \  /      \           
+    $$$$  /$$$$ | $$$$$$  |$$$$$$$  | $$$$$$  |/$$$$$$  |/$$$$$$  |/$$$$$$  |          
+    $$ $$ $$/$$ | /    $$ |$$ |  $$ | /    $$ |$$ |  $$ |$$    $$ |$$ |  $$/           
+    $$ |$$$/ $$ |/$$$$$$$ |$$ |  $$ |/$$$$$$$ |$$ \__$$ |$$$$$$$$/ $$ |                
+    $$ | $/  $$ |$$    $$ |$$ |  $$ |$$    $$ |$$    $$ |$$       |$$ |                
+    $$/      $$/  $$$$$$$/ $$/   $$/  $$$$$$$/  $$$$$$$ | $$$$$$$/ $$/                 
+                                               /  \__$$ |                              
+                                               $$    $$/                               
+                                                $$$$$$/                                                                    
+-----------------------------------------------------------------------------------------
+    `)
+	);
   runTracker();
 });
 
@@ -208,31 +240,11 @@ function viewDepartment(department){
 }
 
 async function viewByManager(){
-  // var managers = [];
-  // var managerList = [];
-  // var query = "select distinct(e.manager_id), m.first_name, m.last_name from employee e\n";
-  // query += "left join employee m on m.id = e.manager_id";
-  // async function getManagers(){
-  //   await connection.query(query, function(err, res){
-  //     for (i = 0; i < res.length; i++){
-  //         managers.push(res[i]);
-  //     }
-  //     managers.shift();
-  //     managers.forEach((element) => {
-  //       managerList.push(element.first_name + " " + element.last_name);
-  //     })
-  //     // console.log(managers);
-  //     // console.log(managerList);
-  //     managerList.push("Return to Main Menu");
-  //     promptUserForManager(managerList, managers);
-  //   })
-  // };
   await function (){
     getManagers();
   }
   promptUserForManager(managerList, managers);
   
-
   function promptUserForManager(managerList, managers){
     var question = {
       name: "action",
@@ -350,7 +362,7 @@ function addEmployeePrompt(roles, roleList, employees, employeeList){
     query += JSON.stringify(roleID) + ", " + JSON.stringify(manID) + ")";
     connection.query(query, function(err, res){
       if(err) throw err;
-      console.log("Added " + answer.fName + " " + answer.lName + " to the database");
+      console.log(chalk.grey("Added " + answer.fName + " " + answer.lName + " to the database"));
       runTracker();
       getEmployees();
     })
