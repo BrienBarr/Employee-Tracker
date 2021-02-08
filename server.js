@@ -49,6 +49,7 @@ function getEmployees(){
 };
 
 getEmployees();
+getRoles();
 
 function runTracker() {
   inquirer
@@ -360,5 +361,55 @@ async function removeEmployee(){
       runTracker();
       getEmployees();
     })
+  })
+}
+
+async function updateRole(){
+  var employeeName;
+  var employeeID;
+  var roleID;
+  await inquirer
+  .prompt([
+      {
+        name: "employee",
+        type: "rawlist",
+        message: "Which employee's role do you wish to update?",
+        choices: employeeList
+      }
+  ])
+  .then(function(answer){
+    employeeName = answer.employee.split(" ");
+    employees.forEach((element) => {
+      if((element.first_name === employeeName[0]) && (element.last_name === employeeName[1])){
+        employeeID = element.id;
+        // console.log(typeof delID);
+      }
+    });
+  })
+  await inquirer
+  .prompt(
+    {
+      name: "newRole",
+        type: "rawlist",
+        message: "What is " + employeeName[0] + " " + employeeName[1] + "'s new role?",
+        choices: roleList
+    }
+  )
+  .then(function(answer){
+    roles.forEach((element) => {
+      if(element.title === answer.newRole){
+        roleID = element.id;
+        // console.log(roleID);
+      }
+    })
+  })
+  var query = "UPDATE employee\n";
+  query += "SET role_id = ?\n";
+  query += "WHERE id = ?"
+  connection.query(query, [roleID, employeeID], function(err, res){
+    if (err) throw err;
+    console.log("Role updated!")
+    runTracker();
+    getEmployees();
   })
 }
