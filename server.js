@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+// const util = require("util");
 const cTable = require('console.table');
 
 var connection = mysql.createConnection({
@@ -23,8 +24,31 @@ connection.connect(function(err) {
 
 var employees = [];
 var employeeList = [];
+// var eArray = [];
 var roles = [];
 var roleList = [];
+
+function getEmployees(){
+  employees = [];
+  var query = "SELECT * FROM employee;";
+  connection.query(query, function(err, res){
+    for (i = 0; i < res.length; i++){
+      employees.push(res[i]);
+    }
+      employees.forEach((element) => {
+        employeeList.push(element.first_name + " " + element.last_name);
+      })
+      employeeList.push("Return to Main Menu");
+      // console.log("GOT EMPLOYEES!");
+      // console.log(employees);
+      // console.log(employeeList);
+      // eArray.push(employees);
+      // eArray.push(employeeList); 
+  })
+  // return eArray;
+};
+
+getEmployees();
 
 function runTracker() {
   inquirer
@@ -230,23 +254,13 @@ function viewByManager(){
 async function addEmployee(){
   await getEmployees();
   await getRoles();
+  // console.log(employeeList);
   addEmployeePrompt(roles, roleList, employees, employeeList);  
 }
 
-function getEmployees(){
-  var query = "SELECT * FROM employee;";
-  connection.query(query, function(err, res){
-    for (i = 0; i < res.length; i++){
-      employees.push(res[i]);
-    }
-      employees.forEach((element) => {
-        employeeList.push(element.first_name + " " + element.last_name);
-      })
-      employeeList.push("Return to Main Menu"); 
-  })
-}
-
 function getRoles(){
+  roles = [];
+  roleList = [];
   var query = "SELECT * FROM role;";
   connection.query(query, function(err, res){
     for (i = 0; i < res.length; i++){
@@ -287,20 +301,20 @@ function addEmployeePrompt(roles, roleList, employees, employeeList){
   ])
   .then(function(answer){
     // if (err) throw err;
-    console.log("New Employee: " + JSON.stringify(answer));
+    // console.log("New Employee: " + JSON.stringify(answer));
     var manName = answer.manager.split(" ");
     var manID;
     employees.forEach((element) => {
       if((element.first_name === manName[0]) && (element.last_name === manName[1])){
         manID = element.id;
-        console.log(manID);
+        // console.log(manID);
       }
     })
     var roleID;
     roles.forEach((element) => {
       if(element.title === answer.role){
         roleID = element.id;
-        console.log(roleID);
+        // console.log(roleID);
       }
     })
     query = "INSERT INTO employee (first_name, last_name, role_id, manager_id)\n";
@@ -310,6 +324,41 @@ function addEmployeePrompt(roles, roleList, employees, employeeList){
       if(err) throw err;
       console.log("Added " + answer.fName + " " + answer.lName + " to the database");
       runTracker();
+      getEmployees();
+    })
+  })
+}
+
+async function removeEmployee(){
+  // console.log("REMOVING EMPLOYEES")
+  // console.log(employees);
+  // console.log(employeeList);
+  await inquirer
+  .prompt([
+      {
+        name: "employee",
+        type: "rawlist",
+        message: "Which employee do you wish to delete?",
+        choices: employeeList
+      }
+  ])
+  .then(function(answer){
+    // if (err) throw err;
+    // console.log("Employee to remove: " + JSON.stringify(answer));
+    var delName = answer.employee.split(" ");
+    var delID;
+    employees.forEach((element) => {
+      if((element.first_name === delName[0]) && (element.last_name === delName[1])){
+        delID = element.id;
+        // console.log(typeof delID);
+      }
+      query = "DELETE FROM employee where id = ?";
+    })
+    connection.query(query, [delID], function(err, res){
+      if(err) throw err;
+      console.log("Deleted " + answer.employee + " from the database");
+      runTracker();
+      getEmployees();
     })
   })
 }
