@@ -33,5 +33,5 @@ SET manager_id = 3
 WHERE role_id = 7;
 
 UPDATE employee
-SET manager_id = 4
+SET manager_id = 6
 WHERE role_id = 2;
