@@ -24,12 +24,15 @@ connection.connect(function(err) {
 
 var employees = [];
 var employeeList = [];
+var managers = [];
+var managerList = [];
 // var eArray = [];
 var roles = [];
 var roleList = [];
 
 function getEmployees(){
   employees = [];
+  employeeList = [];
   var query = "SELECT * FROM employee;";
   connection.query(query, function(err, res){
     for (i = 0; i < res.length; i++){
@@ -48,7 +51,27 @@ function getEmployees(){
   // return eArray;
 };
 
+function getManagers(){
+  managers = [];
+  managerList = [];
+  var query = "select distinct(e.manager_id), m.first_name, m.last_name from employee e\n";
+  query += "left join employee m on m.id = e.manager_id";
+  connection.query(query, function(err, res){
+    for (i = 0; i < res.length; i++){
+        managers.push(res[i]);
+    }
+    managers.shift();
+    managers.forEach((element) => {
+      managerList.push(element.first_name + " " + element.last_name);
+    })
+    // console.log(managers);
+    // console.log(managerList);
+    managerList.push("Return to Main Menu");
+  })
+};
+
 getEmployees();
+getManagers();
 getRoles();
 
 function runTracker() {
@@ -184,27 +207,31 @@ function viewDepartment(department){
   })
 }
 
-function viewByManager(){
-  var managers = [];
-  var managerList = [];
-  var query = "select distinct(e.manager_id), m.first_name, m.last_name from employee e\n";
-  query += "left join employee m on m.id = e.manager_id";
-  async function getManagers(){
-    await connection.query(query, function(err, res){
-      for (i = 0; i < res.length; i++){
-          managers.push(res[i]);
-      }
-      managers.shift();
-      managers.forEach((element) => {
-        managerList.push(element.first_name + " " + element.last_name);
-      })
-      // console.log(managers);
-      // console.log(managerList);
-      managerList.push("Return to Main Menu");
-      promptUserForManager(managerList, managers);
-    })
-  };
-  getManagers();
+async function viewByManager(){
+  // var managers = [];
+  // var managerList = [];
+  // var query = "select distinct(e.manager_id), m.first_name, m.last_name from employee e\n";
+  // query += "left join employee m on m.id = e.manager_id";
+  // async function getManagers(){
+  //   await connection.query(query, function(err, res){
+  //     for (i = 0; i < res.length; i++){
+  //         managers.push(res[i]);
+  //     }
+  //     managers.shift();
+  //     managers.forEach((element) => {
+  //       managerList.push(element.first_name + " " + element.last_name);
+  //     })
+  //     // console.log(managers);
+  //     // console.log(managerList);
+  //     managerList.push("Return to Main Menu");
+  //     promptUserForManager(managerList, managers);
+  //   })
+  // };
+  await function (){
+    getManagers();
+  }
+  promptUserForManager(managerList, managers);
+  
 
   function promptUserForManager(managerList, managers){
     var question = {
@@ -412,4 +439,62 @@ async function updateRole(){
     runTracker();
     getEmployees();
   })
+}
+
+async function updateManager(){
+  if (managers === [] || managerList === []){
+    getManagers();
+  }
+  
+  var employeeName;
+  var employeeID;
+  var mngrID;
+  // var roleID;
+  await inquirer
+  .prompt([
+      {
+        name: "employee",
+        type: "rawlist",
+        message: "Which employee's manager do you wish to update?",
+        choices: employeeList
+      }
+  ])
+  .then(function(answer){
+    employeeName = answer.employee.split(" ");
+    employees.forEach((element) => {
+      if((element.first_name === employeeName[0]) && (element.last_name === employeeName[1])){
+        employeeID = element.id;
+        // console.log(typeof delID);
+      }
+    });
+  })
+  await inquirer
+  .prompt(
+    {
+      name: "newMngr",
+        type: "rawlist",
+        message: "Who is " + employeeName[0] + " " + employeeName[1] + "'s new manager?",
+        choices: managerList
+    }
+  )
+  // update for managers
+  .then(function(answer){
+    var manName = answer.newMngr.split(" ");
+    var manID;
+    managers.forEach((element) => {
+      if((element.first_name === manName[0]) && (element.last_name === manName[1])){
+        manID = element.manager_id;
+      }
+    })
+    var query = "UPDATE employee\n";
+    query += "SET manager_id = ?\n";
+    query += "WHERE id = ?"
+    connection.query(query, [manID, employeeID], function(err, res){
+      if (err) throw err;
+      // console.log("Manager ID: " + manID + " & Employee ID: " + employeeID);
+      console.log("Manager updated!");
+      runTracker();
+      getEmployees();
+    })
+})
 }
