@@ -1,8 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-// const util = require("util");
 const chalk = require("chalk");
-// const colors = require("colors");
 const cTable = require('console.table');
 
 var connection = mysql.createConnection({
@@ -58,7 +56,6 @@ var employees = [];
 var employeeList = [];
 var managers = [];
 var managerList = [];
-// var eArray = [];
 var roles = [];
 var roleList = [];
 
@@ -74,13 +71,7 @@ function getEmployees(){
         employeeList.push(element.first_name + " " + element.last_name);
       })
       employeeList.push("Return to Main Menu");
-      // console.log("GOT EMPLOYEES!");
-      // console.log(employees);
-      // console.log(employeeList);
-      // eArray.push(employees);
-      // eArray.push(employeeList); 
   })
-  // return eArray;
 };
 
 function getManagers(){
@@ -96,8 +87,6 @@ function getManagers(){
     managers.forEach((element) => {
       managerList.push(element.first_name + " " + element.last_name);
     })
-    // console.log(managers);
-    // console.log(managerList);
     managerList.push("Return to Main Menu");
   })
 };
@@ -272,15 +261,11 @@ async function viewByManager(){
       query += "WHERE e.manager_id = ?\n";
       query += "ORDER BY e.id;";
       
-      // console.log(question.choices.indexOf(answer.action));
       var manName = answer.action.split(" ");
       var manID;
-      // console.log(manName);
-      // console.log(managers);
       managers.forEach((element) => {
         if((element.first_name === manName[0]) && (element.last_name === manName[1])){
           manID = element.manager_id;
-          // console.log(manID);
           connection.query(query, manID, async function(err, res) {
             await console.table(res);  
             viewByManager();
@@ -294,7 +279,6 @@ async function viewByManager(){
 async function addEmployee(){
   await getEmployees();
   await getRoles();
-  // console.log(employeeList);
   addEmployeePrompt(roles, roleList, employees, employeeList);  
 }
 
@@ -340,21 +324,17 @@ function addEmployeePrompt(roles, roleList, employees, employeeList){
       }
   ])
   .then(function(answer){
-    // if (err) throw err;
-    // console.log("New Employee: " + JSON.stringify(answer));
     var manName = answer.manager.split(" ");
     var manID;
     employees.forEach((element) => {
       if((element.first_name === manName[0]) && (element.last_name === manName[1])){
         manID = element.id;
-        // console.log(manID);
       }
     })
     var roleID;
     roles.forEach((element) => {
       if(element.title === answer.role){
         roleID = element.id;
-        // console.log(roleID);
       }
     })
     query = "INSERT INTO employee (first_name, last_name, role_id, manager_id)\n";
@@ -370,9 +350,6 @@ function addEmployeePrompt(roles, roleList, employees, employeeList){
 }
 
 async function removeEmployee(){
-  // console.log("REMOVING EMPLOYEES")
-  // console.log(employees);
-  // console.log(employeeList);
   await inquirer
   .prompt([
       {
@@ -383,14 +360,11 @@ async function removeEmployee(){
       }
   ])
   .then(function(answer){
-    // if (err) throw err;
-    // console.log("Employee to remove: " + JSON.stringify(answer));
     var delName = answer.employee.split(" ");
     var delID;
     employees.forEach((element) => {
       if((element.first_name === delName[0]) && (element.last_name === delName[1])){
         delID = element.id;
-        // console.log(typeof delID);
       }
       query = "DELETE FROM employee where id = ?";
     })
@@ -421,7 +395,6 @@ async function updateRole(){
     employees.forEach((element) => {
       if((element.first_name === employeeName[0]) && (element.last_name === employeeName[1])){
         employeeID = element.id;
-        // console.log(typeof delID);
       }
     });
   })
@@ -438,7 +411,6 @@ async function updateRole(){
     roles.forEach((element) => {
       if(element.title === answer.newRole){
         roleID = element.id;
-        // console.log(roleID);
       }
     })
   })
@@ -460,8 +432,6 @@ async function updateManager(){
   
   var employeeName;
   var employeeID;
-  var mngrID;
-  // var roleID;
   await inquirer
   .prompt([
       {
@@ -476,7 +446,6 @@ async function updateManager(){
     employees.forEach((element) => {
       if((element.first_name === employeeName[0]) && (element.last_name === employeeName[1])){
         employeeID = element.id;
-        // console.log(typeof delID);
       }
     });
   })
@@ -489,7 +458,6 @@ async function updateManager(){
         choices: managerList
     }
   )
-  // update for managers
   .then(function(answer){
     var manName = answer.newMngr.split(" ");
     var manID;
@@ -503,7 +471,6 @@ async function updateManager(){
     query += "WHERE id = ?"
     connection.query(query, [manID, employeeID], function(err, res){
       if (err) throw err;
-      // console.log("Manager ID: " + manID + " & Employee ID: " + employeeID);
       console.log("Manager updated!");
       runTracker();
       getEmployees();
