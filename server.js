@@ -64,6 +64,7 @@ function getEmployees(){
   employeeList = [];
   var query = "SELECT * FROM employee;";
   connection.query(query, function(err, res){
+    if (err) throw err;
     for (i = 0; i < res.length; i++){
       employees.push(res[i]);
     }
@@ -80,6 +81,7 @@ function getManagers(){
   var query = "select distinct(e.manager_id), m.first_name, m.last_name from employee e\n";
   query += "left join employee m on m.id = e.manager_id";
   connection.query(query, function(err, res){
+    if (err) throw err;
     for (i = 0; i < res.length; i++){
         managers.push(res[i]);
     }
@@ -163,6 +165,7 @@ function viewEmployees(){
   query += "left join employee m on  m.id = e.manager_id\n";
   query += "ORDER BY e.id;";
     connection.query(query, async function(err, res) {
+      if (err) throw err;
       await console.table(res);  
       runTracker();
     })
@@ -223,6 +226,7 @@ function viewDepartment(department){
   query += "ORDER BY e.id;";
   
   connection.query(query, department, async function(err, res) {
+    if (err) throw err;
     await console.table(res);  
     viewByDepartment();
   })
@@ -267,6 +271,7 @@ async function viewByManager(){
         if((element.first_name === manName[0]) && (element.last_name === manName[1])){
           manID = element.manager_id;
           connection.query(query, manID, async function(err, res) {
+            if (err) throw err;
             await console.table(res);  
             viewByManager();
           })
@@ -287,6 +292,7 @@ function getRoles(){
   roleList = [];
   var query = "SELECT * FROM role;";
   connection.query(query, function(err, res){
+    if (err) throw err;
     for (i = 0; i < res.length; i++){
       roles.push(res[i]);
     }
