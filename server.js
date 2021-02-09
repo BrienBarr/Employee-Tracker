@@ -370,7 +370,7 @@ async function removeEmployee(){
     })
     connection.query(query, [delID], function(err, res){
       if(err) throw err;
-      console.log("Deleted " + answer.employee + " from the database");
+      console.log(chalk.grey("Deleted " + answer.employee + " from the database"));
       runTracker();
       getEmployees();
     })
@@ -419,7 +419,7 @@ async function updateRole(){
   query += "WHERE id = ?"
   connection.query(query, [roleID, employeeID], function(err, res){
     if (err) throw err;
-    console.log("Role updated!")
+    console.log(chalk.grey("Role updated!"));
     runTracker();
     getEmployees();
   })
@@ -471,7 +471,7 @@ async function updateManager(){
     query += "WHERE id = ?"
     connection.query(query, [manID, employeeID], function(err, res){
       if (err) throw err;
-      console.log("Manager updated!");
+      console.log(chalk.grey("Manager updated!"));
       runTracker();
       getEmployees();
     })
